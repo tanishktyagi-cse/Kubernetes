@@ -1,0 +1,49 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress
+  namespace: ingress-nginx
+  annotations:
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://kazix-rancher.s3.eu-west-2.amazonaws.com ,https://explorer.antiers.world/ ,http://localhost:3000"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST,PATCH, OPTIONS, DELETE"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "content-type, x-grpc-web, x-csrf-token"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "http://localhost:3000"
+    nginx.ingress.kubernetes.io/cors-max-age: "600"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+
+    
+spec:
+  rules:
+  - host: explorer.antiers.world
+    http:
+        paths:
+          - path: /LS6q8dsDKSBKNL89CbnfsW3FYP3AQXtg9
+            pathType: Prefix
+            backend:
+              service:
+                name: exchange-castle
+                port: 
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000 
+          - path: /api
+            pathType: Prefix
+            backend:
+              service: 
+                name: gateway 
+                port:
+                  number: 7000
+          - path: /p2p
+            pathType: Prefix
+            backend:
+              service: 
+                name: p2p-frontend
+                port:
+                  number: 8080
