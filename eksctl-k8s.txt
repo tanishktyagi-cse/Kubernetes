@@ -1,0 +1,57 @@
+1>  eksctl create cluster --name=stage-note-buyer \
+                      --region=ap-southeast-1 \
+                       --vpc-private-subnets=subnet-00e0a62743e6db325,subnet-0f1e5556abaaeb936 \
+                      --without-nodegroup 
+
+2>CREATE NODE with YML:-
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: stage-ubuntu
+  region: ap-southeast-1
+managedNodeGroups:
+  - name: ng
+    instanceType: c6a.xlarge
+    desiredCapacity: 1
+    minSize: 1
+    maxSize: 3
+    volumeSize: 50
+    privateNetworking: true
+    ssh: # use existing EC2 key
+      publicKeyName:  stage-ubuntu
+
+
+
+
+
+3>CREATE NODE GROUP:-  eksctl create nodegroup --config-file ubuntu.yml 
+4>CREA
+
+eksctl utils associate-iam-oidc-provider \
+    --region ap-northeast-2 \
+    --cluster prod-ubuntu \
+    --approve
+
+
+eksctl create iamserviceaccount \
+  --cluster=prod-ubuntu \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name prod-AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn=arn:aws:iam::394271579618:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve
+
+
+helm repo add eks https://aws.github.io/eks-charts
+
+helm repo update
+
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=prod-ubuntu \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=ap-northeast-2 \
+  --set vpcId=vpc-00b47654afad5021f	 \
+  --set image.repository=602401143452.dkr.ecr.us-east-2.amazonaws.com/amazon/aws-load-balancer-controller
